@@ -1,0 +1,17 @@
+/* Estilos Header */
+#header {
+    background-color: black;
+    color: azure;
+}
+
+/* Estilos Footer */
+#footer {
+    background-color: black;
+    color: azure;
+}
+
+/* Estilos Loanding */
+#loanding {
+    display: flex;
+    flex-direction: row;
+}
