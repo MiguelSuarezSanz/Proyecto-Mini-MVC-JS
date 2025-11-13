@@ -1,137 +1,149 @@
-async function loadHtml(target, tag) {
+class FrameworkUtils {
 
-    target += ".html";
+    routeError = "error404";
+    cssTag = "#cssRender";
+    jsTag = "#jsRender";
+    htmlTag = "main";
 
-    if (!checkRoute(target)) {
-        console.error(`FATAL ERROR, error HTML not found: ${target}`);
-        return;
+    indexName = "index";
+    headerName = "header";
+    footerName = "footer";
+
+    urlParams = new URLSearchParams(window.location.search);
+
+    constructor() {
+
+        this.autoInit();
+
     }
 
-    fetch(target)
-        .then(response => response.text())
-        .then(data => document.querySelector(tag).innerHTML = data);
+    async loadHtml(target, tag) {
 
-}
+        target += ".html";
 
-async function loadCss(target, tag) {
-
-    target += ".css";
-
-    if (!checkRoute(target)) {
-        console.error(`FATAL ERROR, error CSS not found: ${target}`);
-        return;
-    }
-
-    let link = document.querySelector(tag);
-    link.href = target;
-
-}
-
-async function loadScript(target, tag) {
-
-    target += ".js";
-
-    if (!checkRoute(target)) {
-        console.error(`FATAL ERROR, error Script not found: ${target}`);
-        return;
-    }
-
-    let script = document.querySelector(tag);
-    script.src = target;
-
-}
-
-async function renderize(target) {
-
-    let interval = await loandingProcess();
-    let route = `src/${target}/${target}`;
-    let comprobar = await checkRoute(`src/${target}`);
-
-    if (!comprobar) {
-
-        if (target == routeError) {
-            console.error(`FATAL ERROR, error route not found: ${routeError}`);
+        if (!this.checkRoute(target)) {
+            console.error(`FATAL ERROR, error HTML not found: ${target}`);
             return;
         }
 
-        clearInterval(interval);
-        renderize(routeError);
-        return;
+        fetch(target)
+            .then(response => response.text())
+            .then(data => document.querySelector(tag).innerHTML = data);
+
     }
 
-    loadCss(route, cssTag)
-        .then(loadScript(route, jsTag))
-        .then(loadHtml(route, htmlTag))
-        .then(clearInterval(interval));
+    async loadCss(target, tag) {
 
-}
+        target += ".css";
 
-async function checkRoute(route) {
-    try {
+        if (!this.checkRoute(target)) {
+            console.error(`FATAL ERROR, error CSS not found: ${target}`);
+            return;
+        }
 
-        const response = await fetch(route);
+        let link = document.querySelector(tag);
+        link.href = target;
 
-        if (!response.ok) {
+    }
+
+    async loadScript(target, tag) {
+
+        target += ".js";
+
+        if (!this.checkRoute(target)) {
+            console.error(`FATAL ERROR, error Script not found: ${target}`);
+            return;
+        }
+
+        let script = document.querySelector(tag);
+        script.src = target;
+
+    }
+
+    async renderize(target) {
+
+        let interval = await this.loandingProcess();
+        let route = `src/${target}/${target}`;
+        let comprobar = await this.checkRoute(`src/${target}`);
+
+        if (!comprobar) {
+
+            if (target == this.routeError) {
+                console.error(`FATAL ERROR, error route not found: ${this.routeError}`);
+                return;
+            }
+
+            clearInterval(interval);
+            this.renderize(this.routeError);
+            return;
+        }
+
+        this.loadCss(route, this.cssTag)
+            .then(await this.loadScript(route, this.jsTag))
+            .then(await this.loadHtml(route, this.htmlTag))
+            .then(clearInterval(interval));
+
+    }
+
+    async checkRoute(route) {
+        try {
+
+            const response = await fetch(route);
+
+            if (!response.ok) {
+                return false;
+            }
+            return true;
+
+        } catch (error) {
             return false;
         }
-        return true;
-
-    } catch (error) {
-        return false;
-    }
-
-}
-
-async function autoInit() {
-
-    loadHtml(`includes/html/${headerName}`, "header");
-    loadHtml(`includes/html/${footerName}`, "footer");
-
-    var urlParams = new URLSearchParams(window.location.search);
-
-    if (urlParams.has("target")) {
-
-        renderize(urlParams.get("target"));
-
-    } else {
-
-        renderize(indexName);
 
     }
 
-}
+    async autoInit() {
 
-async function loandingProcess() {
-    let intervalo = null;
+        this.loadHtml(`includes/html/${this.headerName}`, "header");
+        this.loadHtml(`includes/html/${this.footerName}`, "footer");
 
-    await loadHtml("includes/html/loading", "main")
+        if (this.urlParams.has("target")) {
 
-        .then(() => {
+            this.renderize(urlParams.get("target"));
 
-            intervalo = setInterval(() => {
+        } else {
 
-                let puntos = document.querySelector(".puntos");
-                let puntosText = puntos.innerHTML;
-                let numMaxPuntos = 3;
+            this.renderize(this.indexName);
 
-                if (puntosText.length != numMaxPuntos) {
-                    puntos.innerHTML += ".";
-                } else {
-                    puntos.innerHTML = "";
-                }
+        }
 
-            }, 500)
+    }
 
-        });
+    async loandingProcess() {
+        let intervalo = null;
 
-    return intervalo;
-}
+        await this.loadHtml("includes/html/loading", "main")
 
-let routeError = "error404";
-let cssTag = "#cssRender";
-let jsTag = "#jsRender";
-let htmlTag = "main";
+            .then(() => {
 
-let indexName = "index";
-let headerName = "header";
-let footerName = "footer";
+                intervalo = setInterval(() => {
+
+                    let puntos = document.querySelector(".puntos");
+                    let puntosText = puntos.innerHTML;
+                    let numMaxPuntos = 3;
+
+                    if (puntosText.length != numMaxPuntos) {
+                        puntos.innerHTML += ".";
+                    } else {
+                        puntos.innerHTML = "";
+                    }
+
+                }, 500);
+
+            });
+
+        return intervalo;
+    }
+
+};
+
+let frameworkUtils = new FrameworkUtils();
